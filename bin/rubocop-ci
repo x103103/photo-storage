@@ -1,0 +1,128 @@
+#!/usr/bin/env ruby
+
+require "set"
+require "shellwords"
+require "optparse"
+
+class OptionParser
+  # Allow for undefined options
+  def parse_recognized!(args)
+    extra_opts = []
+    begin
+      parse!(args) { |a| extra_opts << a }
+    rescue OptionParser::InvalidOption => e
+      extra_opts << e.args[0]
+      retry
+    end
+    args[0, 0] = extra_opts
+  end
+end
+
+# Helpers for string colorizing
+class String
+  def red
+    "\e[31m#{self}\e[0m"
+  end
+
+  def green
+    "\e[32m#{self}\e[0m"
+  end
+end
+
+# Defaults for passed in options
+options = {
+  branch: "main",
+  remote: "origin",
+}
+
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: rubocop-ci [options]"
+
+  opts.on("-v", "Verbose output") do |v|
+    options[:verbose] = v
+  end
+
+  opts.on("--branch=BRANCH", "Base branch") do |v|
+    options[:branch] = v
+  end
+
+  opts.on("--remote=REMOTE", "Base remote") do |v|
+    options[:remote] = v
+  end
+
+  opts.on("--pre-commit", "Pre commit hook, only check staged files") do |v|
+    options[:pre_commit] = v
+  end
+end
+
+# Pass on all unrecognized options to rubocop
+rubocop_opts = opt_parser.parse_recognized!(ARGV)
+
+fetch_opts = {}
+fetch_opts[[:out, :err]] = "/dev/null" unless options[:verbose]
+
+# Handle staged items for pre-commit hooks
+if options[:pre_commit]
+  file_diff_list = `git --no-pager diff --name-only --staged --diff-filter=d`.split("\n")
+  # This fake sha is what shows for currently staged items in blame
+  commit_list = ["0000000000000000000000000000000000000000"]
+else
+  # Check against the whole branch for pre-push
+  system("git fetch #{options[:remote]} #{options[:branch]}", fetch_opts)
+  unless $?.success?
+    puts "Unknown base git remote or branch use verbose flag for more info".red
+    exit 1
+  end
+
+  git_range = "#{options[:remote]}/#{options[:branch]}...HEAD"
+
+  # All commit SHAs for the current branch compared to base
+  commit_list = `git --no-pager log --no-merges --pretty="%H" #{git_range}`.split("\n")
+
+  # Get all the files to potentially analyze
+  file_diff_list = `git --no-pager diff #{git_range} --name-only --diff-filter=d`.split("\n")
+end
+
+puts "#{file_diff_list.size} files to analyze...".green
+puts file_diff_list, "\n" if options[:verbose]
+
+# For each file, get the lines changed by the above commits
+diff_list = file_diff_list.flat_map do |file|
+  `git --no-pager blame --follow --show-name -l -s "#{file}" | grep -E "(#{commit_list.join("|")})"`.split("\n")
+end
+
+rubocop_results = []
+unless file_diff_list.empty?
+  files = ::Shellwords.join(file_diff_list)
+  rubocop_results = `bundle exec rubocop #{files} --format emacs --force-exclusion #{rubocop_opts}`.split("\n")
+
+  if rubocop_results.empty?
+    puts "No issues found, good job!".green
+    exit 0
+  end
+end
+
+diff_lines = diff_list.map do |diff_list_line|
+  matches = diff_list_line.match(/^[a-z0-9]+\s+(#{file_diff_list.join("|")})\s+(\d+)/)
+  next unless matches
+
+  matches.captures.join(":")
+end
+diff_lines.compact!
+
+# Detect matches between git diff and rubocop results
+err_lines = rubocop_results.select do |rubocop_line|
+  diff_lines.any? { |line| rubocop_line.include? line }
+end
+
+if err_lines.empty?
+  puts "No issues found, good job!".green
+else
+  puts "#{err_lines.length} Lint Errors".red
+  puts "-----------------------------------".red
+  err_lines.uniq.each do |err_line|
+    puts "#{err_line}\n".red
+  end
+  puts "Please resolve them before merging.".red
+  exit 1
+end

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PhotoStorage</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "app" %>
+    <%= javascript_include_tag "app", defer: true %>
+  </head>
+
+  <body>
+    <%= yield %>
+  </body>
+</html>
