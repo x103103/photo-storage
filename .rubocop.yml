@@ -20,3 +20,6 @@ AllCops:
     - config/**/*
     - spec/**/*
   NewCops: enable
+
+Style/Documentation:
+  Enabled: false
