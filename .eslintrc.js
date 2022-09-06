@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
   env: {
     browser: true,
@@ -19,5 +21,15 @@ module.exports = {
   rules: {
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     semi: [2, 'never'],
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        paths: [
+          path.resolve(__dirname, 'app/javascript/app'),
+          path.resolve(__dirname, 'app/assets'),
+        ],
+      },
+    },
   },
 }

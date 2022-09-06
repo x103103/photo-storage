@@ -2,12 +2,13 @@ const path = require('path')
 const webpack = require('webpack')
 const { ESBuildMinifyPlugin } = require('esbuild-loader')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
 process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 const devMode = process.env.NODE_ENV === 'development'
 
 const config = {
   entry: {
-    app: './app/javascript/app/index.js',
+    app: path.resolve(__dirname, 'app/javascript/app/index.js'),
   },
   module: {
     rules: [
@@ -54,9 +55,16 @@ const config = {
       }),
     ],
   },
+  resolve: {
+    modules: [
+      path.resolve(__dirname, 'app/javascript/app'),
+      path.resolve(__dirname, 'app/assets'),
+      'node_modules',
+    ],
+  },
 }
 
-module.exports = (env, argv) => {
+module.exports = () => {
   if (devMode) {
     config.mode = 'development'
     config.devtool = 'eval-source-map'
