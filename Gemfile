@@ -17,6 +17,7 @@ gem 'sprockets-rails'
 # gem "image_processing", "~> 1.2"
 
 group :development, :test do
+  gem 'factory_bot_rails'
   gem 'rspec-rails'
 end
 
@@ -31,5 +32,7 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem 'capybara'
   gem 'selenium-webdriver'
+  gem 'shoulda-matchers'
   gem 'webdrivers'
+  gem 'webmock'
 end
