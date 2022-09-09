@@ -6,6 +6,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '3.1.2'
 
 gem 'bootsnap', require: false
+gem 'graphql'
 gem 'jsbundling-rails'
 gem 'pg', '~> 1.1'
 gem 'puma', '~> 5.0'
@@ -22,6 +23,7 @@ group :development, :test do
 end
 
 group :development do
+  gem 'graphiql-rails', group: :development
   gem 'rubocop-performance'
   gem 'rubocop-rails'
   gem 'rubocop-rake'
