@@ -14,18 +14,25 @@ AllCops:
     - "**/Rakefile"
   Exclude:
     - vendor/**/*
-    - db/**/*
+    - db/schema.rb
     - bin/**/*
     - tmp/**/*
     - config/**/*
-    - spec/**/*
   NewCops: enable
 
 Style/Documentation:
   Enabled: false
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: consistent_comma
 Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: consistent_comma
 Metrics/LineLength:
   Max: 120
 Metrics/MethodLength:
   Max: 20
+RSpec/ExampleLength:
+  Max: 20
+RSpec/DescribeClass:
+  Enabled: false
