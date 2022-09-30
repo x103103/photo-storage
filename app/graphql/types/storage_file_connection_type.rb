@@ -9,7 +9,7 @@ module Types
     def total_count
       # - `object` is the Connection
       # - `object.nodes` is the collection of Posts
-      object.nodes.size
+      object.items.size
     end
   end
 end
