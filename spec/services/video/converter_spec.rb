@@ -5,11 +5,11 @@ require 'rails_helper'
 RSpec.describe Video::Converter do
   subject(:call) { described_class.new(source, destination).call }
 
-  let(:source) { Rails.root.join('spec/fixtures/videos/MOV_0312_000.mp4') }
+  let(:source) { Rails.root.join('spec/fixtures/batch_converter/videos/MOV_0312_000.mp4') }
   let(:destination) { Rails.root.join('tmp/test_videos/MOV_0312_000.mp4') }
-  let(:dir) { Rails.root.join('tmp/test_videos') }
+  let(:destination_dir) { Rails.root.join('tmp/test_videos') }
 
-  before { !Dir.exist?(dir) && Dir.mkdir(dir) }
+  before { !Dir.exist?(destination_dir) && Dir.mkdir(destination_dir) }
 
   after { File.delete(destination) }
 

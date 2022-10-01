@@ -5,11 +5,11 @@ require 'rails_helper'
 RSpec.describe Image::Converter do
   subject(:call) { described_class.new(source, destination).call }
 
-  let(:source) { Rails.root.join('spec/fixtures/images/DSC_0449.JPG') }
+  let(:source) { Rails.root.join('spec/fixtures/batch_converter/images/DSC_0449.JPG') }
   let(:destination) { Rails.root.join('tmp/test_images/DSC_0449.JPG') }
-  let(:dir) { Rails.root.join('tmp/test_images') }
+  let(:destination_dir) { Rails.root.join('tmp/test_images') }
 
-  before { !Dir.exist?(dir) && Dir.mkdir(dir) }
+  before { !Dir.exist?(destination_dir) && Dir.mkdir(destination_dir) }
 
   after { File.delete(destination) }
 
